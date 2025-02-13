@@ -1,0 +1,259 @@
+openapi: 3.0.0
+info:
+  title: Pack and Order API
+  description: API for managing packs and calculating optimal pack combinations for orders
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /packs:
+    get:
+      summary: List all packs
+      description: Retrieves a list of all available packs
+      tags:
+        - Packs
+      responses:
+        '200':
+          description: List of packs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pack'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      summary: Create a new pack
+      description: Creates a new pack with the specified details
+      tags:
+        - Packs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackCreate'
+      responses:
+        '201':
+          description: Pack created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pack'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /packs/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Pack ID
+        schema:
+          type: integer
+          format: int64
+    
+    get:
+      summary: Get a specific pack
+      description: Retrieves details of a specific pack by ID
+      tags:
+        - Packs
+      responses:
+        '200':
+          description: Pack retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pack'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      summary: Update a pack
+      description: Updates an existing pack with new details
+      tags:
+        - Packs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackUpdate'
+      responses:
+        '200':
+          description: Pack updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pack'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: Delete a pack
+      description: Deletes a specific pack by ID
+      tags:
+        - Packs
+      responses:
+        '204':
+          description: Pack deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /order/create:
+    post:
+      summary: Calculate optimal pack combination
+      description: Calculates the optimal combination of packs for a given number of items
+      tags:
+        - Orders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+      responses:
+        '200':
+          description: Optimal pack combination calculated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    Pack:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: "250 pack"
+        amount:
+          type: integer
+          example: 250
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - name
+        - amount
+
+    PackCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "250 pack"
+        amount:
+          type: integer
+          example: 250
+      required:
+        - name
+        - amount
+
+    PackUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "250 pack"
+        amount:
+          type: integer
+          example: 250
+      required:
+        - name
+        - amount
+
+    OrderRequest:
+      type: object
+      properties:
+        items_number:
+          type: integer
+          minimum: 1
+          example: 251
+      required:
+        - items_number
+
+    OrderResponse:
+      type: object
+      properties:
+        items_number:
+          type: integer
+          example: 251
+        total_items:
+          type: integer
+          example: 500
+        packs:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "500 pack"
+              amount:
+                type: integer
+                example: 500
+              count:
+                type: integer
+                example: 1
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Invalid request parameters"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Resource not found"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal server error" 

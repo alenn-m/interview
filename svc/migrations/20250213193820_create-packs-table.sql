@@ -1,0 +1,11 @@
+-- +goose Up
+CREATE TABLE packs (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    amount INTEGER NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- +goose Down
+DROP TABLE packs;
